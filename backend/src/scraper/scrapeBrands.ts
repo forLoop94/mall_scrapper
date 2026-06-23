@@ -104,10 +104,8 @@ export async function scrapeBrands(brandUrls: string[]): Promise<BrandData[]> {
         socialLinks: socialLinksJson,
       });
     } catch (error) {
-      console.error(
-        `  ✗ Failed to scrape brand ${brandUrl}:`,
-        error instanceof Error ? error.message : error,
-      );
+      const errorMsg = `Failed to scrape brand ${brandUrl}: ${error instanceof Error ? error.message : error}\n`;
+      process.stderr.write(`  ✗ ${errorMsg}`);
 
       // Add placeholder with null values
       brands.push({

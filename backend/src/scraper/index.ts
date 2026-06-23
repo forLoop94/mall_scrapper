@@ -1,6 +1,7 @@
 import prisma from "../db/client";
 import { scrapePromotions } from "./scrapePromotions";
 import { scrapeBrands } from "./scrapeBrands";
+import { checkRobotsTxt } from "./robotsCheck";
 import { createHash } from "crypto";
 
 export async function runScraper(jobId: string): Promise<void> {
@@ -13,6 +14,17 @@ export async function runScraper(jobId: string): Promise<void> {
         startedAt: new Date(),
       },
     });
+
+    // Check robots.txt before scraping
+    const baseUrl = "https://www.thepromenadeshopsatbriargate.com";
+    const robotsCheck = await checkRobotsTxt(baseUrl, "/sales");
+
+    if (!robotsCheck.allowed) {
+      throw new Error(
+        robotsCheck.reason ||
+          "Scraping is disallowed by robots.txt for the /sales path",
+      );
+    }
 
     let recordsFound = 0;
     let recordsEnriched = 0;

@@ -142,10 +142,8 @@ export async function scrapePromotions(): Promise<PromotionData[]> {
         brandSourceUrl,
       });
     } catch (error) {
-      console.error(
-        `  ✗ Failed to scrape ${promoUrl}:`,
-        error instanceof Error ? error.message : error,
-      );
+      const errorMsg = `Failed to scrape ${promoUrl}: ${error instanceof Error ? error.message : error}\n`;
+      process.stderr.write(`  ✗ ${errorMsg}`);
     }
   }
 
