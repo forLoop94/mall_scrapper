@@ -1,0 +1,51 @@
+// Prisma schema for Promotions Aggregator MVP
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Brand {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  websiteUrl  String?
+  hours       String? // JSON string: e.g. { "Mon-Sat": "10am-9pm", "Sun": "11am-6pm" }
+  socialLinks String? // JSON string: e.g. { "instagram": "url", "facebook": "url" }
+  sourceUrl   String? // Brand's directory page on the mall site
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  promotions  Promotion[]
+}
+
+model Promotion {
+  id           String    @id @default(cuid())
+  stableId     String    @unique // sha256(sourceUrl) — dedup key
+  name         String
+  description  String?
+  imageUrl     String?
+  startDate    DateTime?
+  endDate      DateTime?
+  sourceUrl    String
+  sourcePortal String    @default("thepromenadeshopsatbriargate.com")
+  scrapedAt    DateTime
+  brandId      String
+  brand        Brand     @relation(fields: [brandId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model ScrapeJob {
+  id              String    @id @default(cuid())
+  status          String // 'pending' | 'running' | 'done' | 'failed'
+  startedAt       DateTime?
+  completedAt     DateTime?
+  recordsFound    Int?
+  recordsEnriched Int?
+  recordsFailed   Int?
+  errorMessage    String?
+  createdAt       DateTime  @default(now())
+}
