@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { delay } from "./utils";
+import { delay, parseDate, excelSerialToDate } from "./utils";
 
 const SCRAPER_DELAY_MS = parseInt(process.env.SCRAPER_DELAY_MS || "1500", 10);
 const SCRAPER_TIMEOUT_MS = parseInt(
@@ -97,10 +97,39 @@ export async function scrapePromotions(): Promise<PromotionData[]> {
           ? `${baseUrl}${brandHref}`
           : brandHref || null;
 
-      // Extract dates - dates are in the listing page data attributes or detail page
-      // For now, set to null - will be implemented in date parsing task
-      const startDate = null;
-      const endDate = null;
+      // Extract dates from multiple sources
+      // 1. Try to get from listing page data attributes (Excel serial format)
+      // 2. Try to get from detail page text (e.g., "Ends 6/30")
+
+      let startDate: Date | null = null;
+      let endDate: Date | null = null;
+
+      // Find the deal-row element in the original listing page for this promotion
+      const dealRow = $(
+        `div.deal-row a[href="${promoUrl.replace(baseUrl, "")}"]`,
+      )
+        .parent()
+        .parent();
+
+      if (dealRow.length > 0) {
+        const dataStart = dealRow.attr("data-start");
+        const dataEnd = dealRow.attr("data-end");
+
+        if (dataStart) {
+          startDate = excelSerialToDate(parseFloat(dataStart));
+        }
+        if (dataEnd) {
+          endDate = excelSerialToDate(parseFloat(dataEnd));
+        }
+      }
+
+      // If no dates from data attributes, try to parse from detail page text
+      if (!endDate) {
+        const endDateText = $detail("div.minor.motice").first().text().trim();
+        if (endDateText) {
+          endDate = parseDate(endDateText);
+        }
+      }
 
       promotions.push({
         name,
