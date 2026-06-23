@@ -43,10 +43,11 @@ export async function scrapePromotions(): Promise<PromotionData[]> {
   const $ = cheerio.load(listingResponse.data);
 
   // Extract promotion links from listing page
+  // Each promotion is in a div.deal-row with an <a href="/deals/ID/">
   const promotionLinks: string[] = [];
-  $("a[href*='/sales/']").each((_, element) => {
+  $("div.deal-row a[href^='/deals/']").each((_, element) => {
     const href = $(element).attr("href");
-    if (href && href !== "/sales" && !href.includes("#")) {
+    if (href) {
       const fullUrl = href.startsWith("http") ? href : `${baseUrl}${href}`;
       if (!promotionLinks.includes(fullUrl)) {
         promotionLinks.push(fullUrl);
@@ -65,27 +66,41 @@ export async function scrapePromotions(): Promise<PromotionData[]> {
       const detailResponse = await axiosClient.get(promoUrl);
       const $detail = cheerio.load(detailResponse.data);
 
-      // Extract promotion details (selectors will need to be adjusted based on actual HTML structure)
-      const name = $detail("h1").first().text().trim() || "Untitled Promotion";
-      const description = $detail("p").first().text().trim() || null;
-      const imageUrl = $detail("img").first().attr("src") || null;
+      // Extract promotion details using actual selectors from the website
+      const name =
+        $detail("h1.head1").first().text().trim() || "Untitled Promotion";
+
+      // Description is in div.deal-detail-description
+      const description =
+        $detail("div.deal-detail-description").first().text().trim() || null;
+
+      // Image is in the deal detail page
+      const imageUrl =
+        $detail("div.deal-detail-image img").first().attr("src") ||
+        $detail("img").first().attr("src") ||
+        null;
       const fullImageUrl =
         imageUrl && !imageUrl.startsWith("http")
           ? `${baseUrl}${imageUrl}`
           : imageUrl;
 
-      // Extract brand name and link
+      // Extract brand name and link - brand link is <a class="store-link" href="/stores/ID-name/">
       const brandName =
-        $detail("a[href*='/stores/']").first().text().trim() || "Unknown Brand";
-      const brandHref = $detail("a[href*='/stores/']").first().attr("href");
+        $detail("a.store-link").first().text().trim() ||
+        $detail("a[href^='/stores/']").first().text().trim() ||
+        "Unknown Brand";
+      const brandHref =
+        $detail("a.store-link").first().attr("href") ||
+        $detail("a[href^='/stores/']").first().attr("href");
       const brandSourceUrl =
         brandHref && !brandHref.startsWith("http")
           ? `${baseUrl}${brandHref}`
           : brandHref || null;
 
-      // Extract dates (if available)
-      const startDate = null; // Will need to parse from page if available
-      const endDate = null; // Will need to parse from page if available
+      // Extract dates - dates are in the listing page data attributes or detail page
+      // For now, set to null - will be implemented in date parsing task
+      const startDate = null;
+      const endDate = null;
 
       promotions.push({
         name,

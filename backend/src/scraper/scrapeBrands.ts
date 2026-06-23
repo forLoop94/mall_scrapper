@@ -40,7 +40,7 @@ export async function scrapeBrands(brandUrls: string[]): Promise<BrandData[]> {
       const response = await axiosClient.get(brandUrl);
       const $ = cheerio.load(response.data);
 
-      // Extract brand website (selectors will need to be adjusted based on actual HTML structure)
+      // Extract brand website - look for external links that aren't social media or mall site
       const websiteUrl =
         $("a[href*='http']")
           .filter((_, el) => {
@@ -50,28 +50,46 @@ export async function scrapeBrands(brandUrls: string[]): Promise<BrandData[]> {
               !href.includes("facebook.com") &&
               !href.includes("instagram.com") &&
               !href.includes("twitter.com") &&
-              !href.includes("tiktok.com")
+              !href.includes("x.com") &&
+              !href.includes("tiktok.com") &&
+              !href.includes("placewise.com")
             );
           })
           .first()
           .attr("href") || null;
 
-      // Extract hours
-      const hoursText = $("*:contains('Hours')").parent().text().trim() || null;
+      // Extract hours from ul.opening-hours
+      // Hours are in <ul class="opening-hours general s"> or <ul class="opening-hours next-7 s">
+      const hoursElements = $(
+        "ul.opening-hours.general li, ul.opening-hours.next-7 li",
+      );
+      let hoursText = null;
+      if (hoursElements.length > 0) {
+        const hoursArray: string[] = [];
+        hoursElements.each((_, el) => {
+          const text = $(el).text().trim();
+          if (text) hoursArray.push(text);
+        });
+        hoursText = hoursArray.join(", ");
+      }
 
-      // Extract social links
+      // Extract social links - they are in the footer or social section
       const socialLinks: any = {};
       $("a[href*='facebook.com']").each((_, el) => {
-        socialLinks.facebook = $(el).attr("href");
+        const href = $(el).attr("href");
+        if (href) socialLinks.facebook = href;
       });
       $("a[href*='instagram.com']").each((_, el) => {
-        socialLinks.instagram = $(el).attr("href");
+        const href = $(el).attr("href");
+        if (href) socialLinks.instagram = href;
       });
       $("a[href*='twitter.com'], a[href*='x.com']").each((_, el) => {
-        socialLinks.x = $(el).attr("href");
+        const href = $(el).attr("href");
+        if (href) socialLinks.x = href;
       });
       $("a[href*='tiktok.com']").each((_, el) => {
-        socialLinks.tiktok = $(el).attr("href");
+        const href = $(el).attr("href");
+        if (href) socialLinks.tiktok = href;
       });
 
       const socialLinksJson =
