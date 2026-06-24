@@ -12,11 +12,17 @@
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone git@github.com:forLoop94/mall_scrapper.git
 cd mall_scrapper
 
-# Install all dependencies and start both servers
-npm install && npm run dev
+# Install all dependencies (root + backend + frontend)
+npm run install:all
+
+# Generate Prisma client
+npm run prisma:generate
+
+# Start both servers
+npm run dev
 ```
 
 **That's it!** The application will start:
@@ -25,6 +31,16 @@ npm install && npm run dev
 - **Frontend UI:** http://localhost:3000
 
 Open http://localhost:3000 in your browser to see the UI.
+
+> **Note:** If you prefer to install manually, run:
+>
+> ```bash
+> npm install
+> cd backend && npm install && cd ..
+> cd frontend && npm install && cd ..
+> npm run prisma:generate
+> npm run dev
+> ```
 
 ---
 
