@@ -26,6 +26,10 @@ export default function Home() {
     total: 0,
     totalPages: 0,
   });
+  const [scrapeStatus, setScrapeStatus] = useState<
+    "idle" | "running" | "done" | "failed"
+  >("idle");
+  const [scrapeMessage, setScrapeMessage] = useState("");
 
   // Fetch brands only once on mount
   useEffect(() => {
@@ -79,6 +83,57 @@ export default function Home() {
     setPagination((prev) => ({ ...prev, page }));
   };
 
+  const triggerScrape = async () => {
+    setScrapeStatus("running");
+    setScrapeMessage("Starting scrape...");
+
+    try {
+      // Trigger scrape
+      const response = await fetch(`${API_URL}/scrape`, { method: "POST" });
+      const data = await response.json();
+      const jobId = data.jobId;
+
+      // Poll for status
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusResponse = await fetch(`${API_URL}/scrape/${jobId}`);
+          const statusData = await statusResponse.json();
+
+          if (statusData.status === "done") {
+            clearInterval(pollInterval);
+            setScrapeStatus("done");
+            setScrapeMessage(
+              `✅ Successfully scraped ${statusData.summary.recordsFound} promotions!`,
+            );
+            // Refresh promotions
+            fetchPromotions();
+            fetchBrands();
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+              setScrapeStatus("idle");
+              setScrapeMessage("");
+            }, 5000);
+          } else if (statusData.status === "failed") {
+            clearInterval(pollInterval);
+            setScrapeStatus("failed");
+            setScrapeMessage(
+              `❌ Scrape failed: ${statusData.errorMessage || "Unknown error"}`,
+            );
+          } else {
+            setScrapeMessage(`Scraping in progress...`);
+          }
+        } catch (error) {
+          clearInterval(pollInterval);
+          setScrapeStatus("failed");
+          setScrapeMessage(`❌ Error checking status: ${error}`);
+        }
+      }, 2000);
+    } catch (error) {
+      setScrapeStatus("failed");
+      setScrapeMessage(`❌ Failed to trigger scrape: ${error}`);
+    }
+  };
+
   return (
     <main className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
@@ -90,7 +145,7 @@ export default function Home() {
           onFilterChange={handleFilterChange}
         />
 
-        <div className="mb-6 flex gap-4">
+        <div className="mb-6 flex gap-4 items-center flex-wrap">
           <button
             onClick={() => setViewMode("list")}
             className={`px-4 py-2 rounded ${
@@ -111,6 +166,43 @@ export default function Home() {
           >
             Group by Brand
           </button>
+
+          <div className="ml-auto flex gap-4 items-center">
+            <button
+              onClick={triggerScrape}
+              disabled={scrapeStatus === "running"}
+              className={`px-4 py-2 rounded font-medium ${
+                scrapeStatus === "running"
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : scrapeStatus === "done"
+                    ? "bg-green-600 text-white"
+                    : scrapeStatus === "failed"
+                      ? "bg-red-600 text-white"
+                      : "bg-purple-600 text-white hover:bg-purple-700"
+              }`}
+            >
+              {scrapeStatus === "running"
+                ? "Scraping... 🔄"
+                : scrapeStatus === "done"
+                  ? "Scrape Complete ✅"
+                  : scrapeStatus === "failed"
+                    ? "Scrape Failed ❌"
+                    : "Trigger Scrape"}
+            </button>
+            {scrapeMessage && (
+              <span
+                className={`text-sm ${
+                  scrapeStatus === "done"
+                    ? "text-green-600"
+                    : scrapeStatus === "failed"
+                      ? "text-red-600"
+                      : "text-gray-600"
+                }`}
+              >
+                {scrapeMessage}
+              </span>
+            )}
+          </div>
         </div>
 
         {loading ? (
