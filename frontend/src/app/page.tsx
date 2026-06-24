@@ -27,17 +27,22 @@ export default function Home() {
     totalPages: 0,
   });
 
+  // Fetch brands only once on mount
+  useEffect(() => {
+    fetchBrands();
+  }, []);
+
+  // Fetch promotions when filters or page changes
   useEffect(() => {
     fetchPromotions();
-    fetchBrands();
   }, [filters, pagination.page]);
 
   const fetchPromotions = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        pageSize: pagination.pageSize.toString(),
+        page: (pagination?.page || 1).toString(),
+        pageSize: (pagination?.pageSize || 20).toString(),
         ...(filters.search && { search: filters.search }),
         ...(filters.brand && { brand: filters.brand }),
         ...(filters.startDate && { startDate: filters.startDate }),
@@ -67,11 +72,11 @@ export default function Home() {
 
   const handleFilterChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
-    setPagination({ ...pagination, page: 1 });
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
   const handlePageChange = (page: number) => {
-    setPagination({ ...pagination, page });
+    setPagination((prev) => ({ ...prev, page }));
   };
 
   return (
