@@ -462,6 +462,34 @@ npx prisma db push         # Push schema changes without migration
 
 ## 🐛 Troubleshooting
 
+### "nodemon is not recognized" or "next is not recognized"
+
+**Problem:** You ran `npm install` at the root, but it only installed root dependencies, not backend/frontend dependencies.
+
+**Solution:**
+
+```bash
+npm run install:all
+```
+
+This installs dependencies for root, backend, and frontend directories.
+
+### "@prisma/client did not initialize yet"
+
+**Problem:** Prisma client hasn't been generated from the schema.
+
+**Solution:**
+
+```bash
+npm run prisma:generate
+```
+
+Then restart the dev server:
+
+```bash
+npm run dev
+```
+
 ### Port Already in Use
 
 If you see `EADDRINUSE` errors:
