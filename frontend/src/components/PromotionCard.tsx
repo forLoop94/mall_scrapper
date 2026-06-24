@@ -9,7 +9,7 @@ export default function PromotionCard({ promotion }: PromotionCardProps) {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       {promotion.imageUrl && (
-        <div className="relative h-48 w-full">
+        <div className="relative h-48 w-full overflow-hidden">
           <Image
             src={promotion.imageUrl}
             alt={promotion.name}

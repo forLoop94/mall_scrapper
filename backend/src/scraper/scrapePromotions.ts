@@ -42,15 +42,19 @@ export async function scrapePromotions(): Promise<PromotionData[]> {
   const listingResponse = await axiosClient.get(listingUrl);
   const $ = cheerio.load(listingResponse.data);
 
-  // Extract promotion links from listing page
+  // Extract promotion links and images from listing page
   // Each promotion is in a div.deal-row with an <a href="/deals/ID/">
-  const promotionLinks: string[] = [];
-  $("div.deal-row a[href^='/deals/']").each((_, element) => {
-    const href = $(element).attr("href");
+  const promotionLinks: Array<{ url: string; imageUrl: string | null }> = [];
+  $("div.deal-row").each((_, element) => {
+    const $row = $(element);
+    const href = $row.find("a[href^='/deals/']").attr("href");
+    const imageUrl = $row.find("div.deal-image img").attr("src") || null;
+
     if (href) {
       const fullUrl = href.startsWith("http") ? href : `${baseUrl}${href}`;
-      if (!promotionLinks.includes(fullUrl)) {
-        promotionLinks.push(fullUrl);
+      // Check if URL already exists
+      if (!promotionLinks.some((p) => p.url === fullUrl)) {
+        promotionLinks.push({ url: fullUrl, imageUrl });
       }
     }
   });
@@ -58,7 +62,10 @@ export async function scrapePromotions(): Promise<PromotionData[]> {
   console.log(`📋 Found ${promotionLinks.length} promotion links`);
 
   // Pass 2: Scrape each promotion detail page
-  for (const promoUrl of promotionLinks) {
+  for (const promoData of promotionLinks) {
+    const promoUrl = promoData.url;
+    const listingImageUrl = promoData.imageUrl;
+
     try {
       await delay(SCRAPER_DELAY_MS);
 
@@ -74,15 +81,8 @@ export async function scrapePromotions(): Promise<PromotionData[]> {
       const description =
         $detail("div.deal-detail-description").first().text().trim() || null;
 
-      // Image is in the deal detail page
-      const imageUrl =
-        $detail("div.deal-detail-image img").first().attr("src") ||
-        $detail("img").first().attr("src") ||
-        null;
-      const fullImageUrl =
-        imageUrl && !imageUrl.startsWith("http")
-          ? `${baseUrl}${imageUrl}`
-          : imageUrl;
+      // Use image from listing page (already has unique image per promotion)
+      const fullImageUrl = listingImageUrl;
 
       // Extract brand name and link - brand link is <a class="store-link" href="/stores/ID-name/">
       const brandName =

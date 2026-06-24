@@ -6,6 +6,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "www.thepromenadeshopsatbriargate.com",
       },
+      {
+        protocol: "https",
+        hostname: "cdn-files.eu.placewise.com",
+      },
     ],
   },
 };
