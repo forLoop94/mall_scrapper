@@ -150,7 +150,7 @@ export default function Home() {
             onClick={() => setViewMode("list")}
             className={`px-4 py-2 rounded ${
               viewMode === "list"
-                ? "bg-blue-600 text-white"
+                ? "bg-purple-600 text-white"
                 : "bg-gray-200 text-gray-700"
             }`}
           >
@@ -160,7 +160,7 @@ export default function Home() {
             onClick={() => setViewMode("grouped")}
             className={`px-4 py-2 rounded ${
               viewMode === "grouped"
-                ? "bg-blue-600 text-white"
+                ? "bg-purple-600 text-white"
                 : "bg-gray-200 text-gray-700"
             }`}
           >
