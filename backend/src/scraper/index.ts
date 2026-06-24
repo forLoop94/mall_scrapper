@@ -108,7 +108,8 @@ export async function runScraper(jobId: string): Promise<void> {
 
         recordsEnriched++;
       } catch (error) {
-        console.error("Error persisting promotion:", error);
+        const errorMsg = `Error persisting promotion ${promoData.name}: ${error instanceof Error ? error.message : error}\n`;
+        process.stderr.write(errorMsg);
         recordsFailed++;
       }
     }
@@ -125,7 +126,8 @@ export async function runScraper(jobId: string): Promise<void> {
       },
     });
   } catch (error) {
-    console.error("Scraper failed:", error);
+    const errorMsg = `Scraper failed: ${error instanceof Error ? error.message : "Unknown error"}\n`;
+    process.stderr.write(errorMsg);
 
     // Update job status to failed
     await prisma.scrapeJob.update({

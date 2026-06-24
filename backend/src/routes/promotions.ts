@@ -72,7 +72,8 @@ router.get("/", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching promotions:", error);
+    const errorMsg = `Error fetching promotions: ${error instanceof Error ? error.message : error}\n`;
+    process.stderr.write(errorMsg);
     res.status(500).json({
       error: "Internal Server Error",
       message: "Failed to fetch promotions",
@@ -103,7 +104,8 @@ router.get("/:id", async (req, res) => {
 
     res.json({ data: promotion });
   } catch (error) {
-    console.error("Error fetching promotion:", error);
+    const errorMsg = `Error fetching promotion: ${error instanceof Error ? error.message : error}\n`;
+    process.stderr.write(errorMsg);
     res.status(500).json({
       error: "Internal Server Error",
       message: "Failed to fetch promotion",

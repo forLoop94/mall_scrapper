@@ -22,7 +22,8 @@ router.post("/", async (req, res) => {
     // Return immediately with HTTP 202
     res.status(202).json({ jobId: job.id });
   } catch (error) {
-    console.error("Error creating scrape job:", error);
+    const errorMsg = `Error creating scrape job: ${error instanceof Error ? error.message : error}\n`;
+    process.stderr.write(errorMsg);
     res.status(500).json({
       error: "Internal Server Error",
       message: "Failed to create scrape job",
@@ -67,7 +68,8 @@ router.get("/:jobId", async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    console.error("Error fetching scrape job:", error);
+    const errorMsg = `Error fetching scrape job: ${error instanceof Error ? error.message : error}\n`;
+    process.stderr.write(errorMsg);
     res.status(500).json({
       error: "Internal Server Error",
       message: "Failed to fetch scrape job",

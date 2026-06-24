@@ -31,7 +31,8 @@ router.get("/", async (req, res) => {
 
     res.json({ data: brandsWithCount });
   } catch (error) {
-    console.error("Error fetching brands:", error);
+    const errorMsg = `Error fetching brands: ${error instanceof Error ? error.message : error}\n`;
+    process.stderr.write(errorMsg);
     res.status(500).json({
       error: "Internal Server Error",
       message: "Failed to fetch brands",
