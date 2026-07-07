@@ -60,9 +60,7 @@ export async function scrapeBrands(brandUrls: string[]): Promise<BrandData[]> {
 
       // Extract hours from ul.opening-hours
       // Hours are in <ul class="opening-hours general s"> or <ul class="opening-hours next-7 s">
-      const hoursElements = $(
-        "ul.opening-hours.general li, ul.opening-hours.next-7 li",
-      );
+      const hoursElements = $("ul.opening-hours.general li");
       let hoursText = null;
       if (hoursElements.length > 0) {
         const hoursArray: string[] = [];
@@ -73,29 +71,9 @@ export async function scrapeBrands(brandUrls: string[]): Promise<BrandData[]> {
         hoursText = hoursArray.join(", ");
       }
 
-      // Extract social links - they are in the footer or social section
-      const socialLinks: any = {};
-      $("a[href*='facebook.com']").each((_, el) => {
-        const href = $(el).attr("href");
-        if (href) socialLinks.facebook = href;
-      });
-      $("a[href*='instagram.com']").each((_, el) => {
-        const href = $(el).attr("href");
-        if (href) socialLinks.instagram = href;
-      });
-      $("a[href*='twitter.com'], a[href*='x.com']").each((_, el) => {
-        const href = $(el).attr("href");
-        if (href) socialLinks.x = href;
-      });
-      $("a[href*='tiktok.com']").each((_, el) => {
-        const href = $(el).attr("href");
-        if (href) socialLinks.tiktok = href;
-      });
-
-      const socialLinksJson =
-        Object.keys(socialLinks).length > 0
-          ? JSON.stringify(socialLinks)
-          : null;
+      // Social links are not brand-specific on this website
+      // Only mall-wide links exist in the footer, so we set to null
+      const socialLinksJson = null;
 
       brands.push({
         sourceUrl: brandUrl,
