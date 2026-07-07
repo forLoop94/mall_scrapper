@@ -39,10 +39,26 @@ router.get("/", async (req, res) => {
     if (startDate || endDate) {
       where.AND = [];
       if (startDate) {
-        where.AND.push({ startDate: { gte: new Date(startDate as string) } });
+        const start = new Date(startDate as string);
+        if (isNaN(start.getTime())) {
+          return res.status(400).json({
+            error: "Bad Request",
+            message: "Invalid startDate format. Please use YYYY-MM-DD.",
+            statusCode: 400,
+          });
+        }
+        where.AND.push({ startDate: { gte: start } });
       }
       if (endDate) {
-        where.AND.push({ endDate: { lte: new Date(endDate as string) } });
+        const end = new Date(endDate as string);
+        if (isNaN(end.getTime())) {
+          return res.status(400).json({
+            error: "Bad Request",
+            message: "Invalid endDate format. Please use YYYY-MM-DD.",
+            statusCode: 400,
+          });
+        }
+        where.AND.push({ endDate: { lte: end } });
       }
     }
 
@@ -78,6 +94,13 @@ router.get("/", async (req, res) => {
       error: "Internal Server Error",
       message: "Failed to fetch promotions",
       statusCode: 500,
+      data: [],
+      pagination: {
+        page: 1,
+        pageSize: 20,
+        total: 0,
+        totalPages: 0,
+      },
     });
   }
 });
