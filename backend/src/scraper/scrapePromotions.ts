@@ -105,11 +105,10 @@ export async function scrapePromotions(): Promise<PromotionData[]> {
       let endDate: Date | null = null;
 
       // Find the deal-row element in the original listing page for this promotion
+      // Use .closest() to traverse up to the deal-row parent (more robust than .parent().parent())
       const dealRow = $(
         `div.deal-row a[href="${promoUrl.replace(baseUrl, "")}"]`,
-      )
-        .parent()
-        .parent();
+      ).closest("div.deal-row");
 
       if (dealRow.length > 0) {
         const dataStart = dealRow.attr("data-start");

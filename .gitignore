@@ -43,3 +43,6 @@ backend/prisma/migrations/
 
 # TypeScript
 *.tsbuildinfo
+
+# Temporary debugging files
+live_sales_page.html
