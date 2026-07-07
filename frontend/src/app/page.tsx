@@ -54,9 +54,23 @@ export default function Home() {
       });
 
       const response = await fetch(`${API_URL}/promotions?${params}`);
+
+      if (!response.ok) {
+        console.error("API error:", response.status);
+        setLoading(false);
+        return;
+      }
+
       const data = await response.json();
-      setPromotions(data.data);
-      setPagination(data.pagination);
+      setPromotions(data.data || []);
+      setPagination(
+        data.pagination || {
+          page: 1,
+          pageSize: 20,
+          total: 0,
+          totalPages: 0,
+        },
+      );
     } catch (error) {
       console.error("Error fetching promotions:", error);
     } finally {
