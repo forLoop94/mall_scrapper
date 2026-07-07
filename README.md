@@ -42,6 +42,29 @@ Open http://localhost:3000 in your browser to see the UI.
 > npm run dev
 > ```
 
+### Populate the Database
+
+Once both servers are running, you need to trigger a scrape to populate the database. There are three ways to do this:
+
+**Option 1: Via the UI (Easiest)**
+
+- Open http://localhost:3000 in your browser
+- Click the **"Trigger Scrape"** button at the top of the page
+- Watch the live status update: `Scraping... 🔄` → `Scrape Complete ✅`
+- A summary message will show how many promotions were found
+
+**Option 2: Via Command Line**
+
+```bash
+curl -X POST http://localhost:4000/scrape
+```
+
+**Option 3: Via Browser (Direct API call)**
+
+- Visit http://localhost:4000/scrape
+
+The scrape takes 2-3 minutes and runs in the background. You can monitor progress via the UI button or the backend console.
+
 ---
 
 ## 📋 What This Does
@@ -185,6 +208,30 @@ npm run dev
 npm run dev:backend   # Backend only (port 4000)
 npm run dev:frontend  # Frontend only (port 3000)
 ```
+
+### 5. Populate the Database
+
+Trigger the scrape using any of these methods:
+
+**Easiest: Use the UI button**
+
+- Open http://localhost:3000
+- Click **"Trigger Scrape"** at the top of the page
+- The button shows live status: `Scraping... 🔄` → `Scrape Complete ✅`
+
+**Or via curl:**
+
+```bash
+curl -X POST http://localhost:4000/scrape
+```
+
+**Or visit in browser:**
+
+```
+http://localhost:4000/scrape
+```
+
+The scrape takes 2-3 minutes. Monitor progress via the UI button, or in the backend console.
 
 ---
 
@@ -385,7 +432,8 @@ curl -X POST http://localhost:4000/scrape
 **Via Frontend:**
 
 - Open http://localhost:3000
-- Click the "Trigger Scrape" button (if implemented in UI)
+- Click the **"Trigger Scrape"** button at the top of the page
+- Status updates live: `Scraping... 🔄` → `Scrape Complete ✅` with a results summary
 
 ### 2. Check Scrape Status
 
@@ -399,6 +447,7 @@ curl http://localhost:4000/scrape/<jobId>
 **Via Frontend:**
 
 - Open http://localhost:3000
+- Click **"Trigger Scrape"** anytime to refresh promotions from the source site
 - Use filters to search by brand, date range, or keywords
 - Toggle between list view and group-by-brand view
 - Navigate pages using pagination controls
@@ -601,7 +650,7 @@ See [DESIGN.md](./DESIGN.md) for full list of intentional cuts and future enhanc
 
 ---
 
-## 📄 License
+## License
 
 ISC
 
