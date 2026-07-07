@@ -47,7 +47,7 @@ router.get("/", async (req, res) => {
             statusCode: 400,
           });
         }
-        where.AND.push({ startDate: { gte: start } });
+        where.AND.push({ endDate: { gte: start } });
       }
       if (endDate) {
         const end = new Date(endDate as string);
@@ -58,7 +58,7 @@ router.get("/", async (req, res) => {
             statusCode: 400,
           });
         }
-        where.AND.push({ endDate: { lte: end } });
+        where.AND.push({ startDate: { lte: end } });
       }
     }
 
